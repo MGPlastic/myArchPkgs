@@ -1,0 +1,24 @@
+From 981e63d8c24f4f8ebeb706108299c4c76417ab67 Mon Sep 17 00:00:00 2001
+From: Igor Murzov <igor.murzov@xperience.ai>
+Date: Thu, 6 Feb 2020 18:04:09 +0300
+Subject: [PATCH] Install all CMake files required to build samples
+
+CMakeLists.txt includes samples_utils.cmake, so the later should be
+installed as well to make samples build successfully
+---
+ samples/CMakeLists.txt | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/samples/CMakeLists.txt b/samples/CMakeLists.txt
+index a7fd21e6b04..4cc4c07d7b8 100644
+--- a/samples/CMakeLists.txt
++++ b/samples/CMakeLists.txt
+@@ -45,7 +45,7 @@ if(INSTALL_PYTHON_EXAMPLES)
+   add_subdirectory(python)
+ endif()
+ 
+-ocv_install_example_src("." CMakeLists.txt)
++ocv_install_example_src("." CMakeLists.txt samples_utils.cmake)
+ if(INSTALL_C_EXAMPLES)
+   install(DIRECTORY data DESTINATION "${OPENCV_SAMPLES_SRC_INSTALL_PATH}" COMPONENT samples_data)
+ endif()

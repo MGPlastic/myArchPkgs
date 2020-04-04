@@ -1,0 +1,146 @@
+# Maintainer: MGPlastic <doraismydora@gmail.com>
+# Contributor: Tobias Powalowski <tpowa@archlinux.org>
+
+pkgbase=opencv-for-openface
+pkgname=opencv-for-openface
+_pkgname=opencv
+pkgver=4.2.0
+pkgrel=1
+pkgdesc="OpenCV static library for TadasBaltrusaitis/OpenFace"
+arch=(x86_64)
+license=(BSD)
+url="https://opencv.org/"
+depends=(intel-tbb cblas ffmpeg)
+makedepends=(cmake mesa hdf5 glew ant)
+conflicts=(opencv)
+source=("$_pkgname-$pkgver.tar.gz::https://github.com/opencv/opencv/archive/$pkgver.zip"
+        opencv-includedir.patch
+        opencv-install-samples_utils.patch)
+sha256sums=('55bd939079d141a50fca74bde5b61b339dd0f0ece6320ec76859aaff03c90d9f'
+            'a96e35c9592e655b21a62cfe04e864a10e21535ad900e5de67356b9e9f40ca10'
+            'c370f234931d46cd01234d48a01af02642d7e90a0486278fa7845d3bac1c514a')
+
+prepare() {
+  mkdir -p build
+
+  cd $_pkgname-$pkgver
+  patch -p1 -i ../opencv-includedir.patch # Fix wrong include patch in pkgconfig file
+  patch -p1 -i ../opencv-install-samples_utils.patch # Install all CMake files required to build samples
+
+  sed -e '/ocv_tbb_cmake_guess(HAVE_TBB)/d' -i cmake/OpenCVDetectTBB.cmake # Don't use TBB's cmake config, it breaks build
+
+  # it downloads too slow, so change the source to local url
+  sed -i "48i\"file://$srcdir/3rdparty/ippicv/\"" ./3rdparty/ippicv/ippicv.cmake 
+  sed -i "47d" ./3rdparty/ippicv/ippicv.cmake 
+  cd ..
+  ln -sf ../3rdparty 3rdparty
+}
+
+build() {
+   cd build
+  # cmake's FindLAPACK doesn't add cblas to LAPACK_LIBRARIES, so we need to specify them manually
+  cmake ../$_pkgname-$pkgver \
+    -DBUILD_CUDA_STUBS=OFF \
+    -DBUILD_DOCS=OFF \
+    -DBUILD_EXAMPLES=OFF \
+    -DBUILD_IPP_IW=OFF \
+    -DBUILD_ITT=OFF \
+    -DBUILD_JASPER=OFF \
+    -DBUILD_JAVA=OFF \
+    -DBUILD_JPEG=OFF \
+    -DBUILD_LIST="core,imgproc,calib3d,highgui,objdetect,videoio" \
+    -DBUILD_OPENEXR=OFF \
+    -DBUILD_PACKAGE=OFF \
+    -DBUILD_PERF_TESTS=OFF \
+    -DBUILD_PNG=OFF \
+    -DBUILD_PROTOBUF=OFF \
+    -DBUILD_SHARED_LIBS=OFF \
+    -DBUILD_TBB=OFF \
+    -DBUILD_TESTS=OFF \
+    -DBUILD_TIFF=ON \
+    -DBUILD_USE_SYMLINKS=OFF \
+    -DBUILD_WEBP=OFF \
+    -DBUILD_WITH_DEBUG_INFO=OFF \
+    -DBUILD_WITH_DYNAMIC_IPP=OFF \
+    -DBUILD_ZLIB=OFF \
+    -DCMAKE_BUILD_TYPE=RELEASE \
+    -DCMAKE_INSTALL_PREFIX=/usr \
+    -DCPU_BASELINE=SSE2 \
+    -DCPU_DISPATCH=SSE2 \
+    -DINSTALL_CREATE_DISTRIB=OFF \
+    -DINSTALL_C_EXAMPLES=OFF \
+    -DINSTALL_PYTHON_EXAMPLES=OFF \
+    -DINSTALL_TESTS=OFF \
+    -DINSTALL_TO_MANGLED_PATHS=OFF \
+    -DLAPACK_CBLAS_H="/usr/include/cblas.h" \
+    -DLAPACK_LAPACKE_H="/usr/include/lapacke.h" \
+    -DLAPACK_LIBRARIES="/usr/lib/liblapack.so;/usr/lib/libblas.so;/usr/lib/libcblas.so" \
+    -DOPENCV_ENABLE_NONFREE=ON \
+    -DOPENCV_GENERATE_PKGCONFIG=ON \
+    -DOPENCV_GENERATE_SETUPVARS=OFF \
+    -DWITH_1394=OFF \
+    -DWITH_ADE=OFF \
+    -DWITH_ARAVIS=OFF \
+    -DWITH_CLP=OFF \
+    -DWITH_CUDA=OFF \
+    -DWITH_EIGEN=OFF \
+    -DWITH_FFMPEG=ON \
+    -DWITH_FREETYPE=OFF \
+    -DWITH_GDAL=OFF \
+    -DWITH_GDCM=OFF \
+    -DWITH_GPHOTO2=OFF \
+    -DWITH_GSTREAMER=OFF \
+    -DWITH_GTK=OFF \
+    -DWITH_GTK_2_X=OFF \
+    -DWITH_HALIDE=OFF \
+    -DWITH_HPX=OFF \
+    -DWITH_IMGCODEC_HDR=ON \
+    -DWITH_IMGCODEC_PFM=ON \
+    -DWITH_IMGCODEC_PXM=ON \
+    -DWITH_IMGCODEC_SUNRASTER=ON \
+    -DWITH_INF_ENGINE=OFF \
+    -DWITH_IPP=ON \
+    -DWITH_ITT=ON \
+    -DWITH_JASPER=OFF \
+    -DWITH_JPEG=ON \
+    -DWITH_LAPACK=OFF \
+    -DWITH_LIBREALSENSE=OFF \
+    -DWITH_MFX=OFF \
+    -DWITH_NGRAPH=OFF \
+    -DWITH_OPENCL=OFF \
+    -DWITH_OPENCLAMDBLAS=OFF \
+    -DWITH_OPENCLAMDFFT=OFF \
+    -DWITH_OPENCL_SVM=OFF \
+    -DWITH_OPENEXR=OFF \
+    -DWITH_OPENGL=OFF \
+    -DWITH_OPENMP=OFF \
+    -DWITH_OPENNI=OFF \
+    -DWITH_OPENNI2=OFF \
+    -DWITH_OPENVX=OFF \
+    -DWITH_PLAIDML=OFF \
+    -DWITH_PNG=ON \
+    -DWITH_PROTOBUF=OFF \
+    -DWITH_PTHREADS_PF=ON \
+    -DWITH_PVAPI=OFF \
+    -DWITH_QT=OFF \
+    -DWITH_QUIRC=OFF \
+    -DWITH_TBB=ON \
+    -DWITH_TIFF=ON \
+    -DWITH_V4L=ON \
+    -DWITH_VA=OFF \
+    -DWITH_VA_INTEL=OFF \
+    -DWITH_VTK=OFF \
+    -DWITH_VULKAN=OFF \
+    -DWITH_WEBP=ON \
+    -DWITH_XIMEA=OFF \
+    -DWITH_XINE=OFF
+  make
+}
+
+package_opencv-for-openface() {
+  cd build
+  make DESTDIR="$pkgdir" install
+
+  # install license file
+  install -Dm644 "$srcdir"/$_pkgname-$pkgver/LICENSE -t "$pkgdir"/usr/share/licenses/$_pkgname
+}

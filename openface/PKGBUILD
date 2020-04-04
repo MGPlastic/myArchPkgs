@@ -1,0 +1,41 @@
+# Maintainer: MGPlastic <doraismydora@gmail.com>
+# Contributor: MGPlastic <doraismydora@gmail.com>
+
+pkgbase=openface-TadasBaltrusaitis
+pkgname=(openface-TadasBaltrusaitis)
+_pkgname=OpenFace
+pkgver=ad1b3cc
+pkgrel=1
+pkgdesc="TadasBaltrusaitis/OpenFace build from git"
+arch=(x86_64)
+license=(BSD)
+url="https://github.com/TadasBaltrusaitis/OpenFace"
+depends=(opencv-for-openface)
+makedepends=(cmake boost cblas dlib)
+source=($_pkgname::'git+https://github.com/TadasBaltrusaitis/OpenFace')
+sha256sums=('SKIP')
+
+pkgver() {
+  cd $_pkgname
+  git rev-parse HEAD | cut -c 1-7
+}
+
+prepare() {
+  mkdir -p build
+
+  # add dependency, avoid cmake error
+  sed -i "17ifind_package(Threads)" ./$_pkgname/CMakeLists.txt 
+}
+
+build() {
+  cd build
+  cmake ../$_pkgname \
+    -DCMAKE_BUILD_TYPE=RELEASE
+  make
+}
+
+package_openface-TadasBaltrusaitis() {
+  cd build
+  make DESTDIR="$pkgdir" install
+
+}
