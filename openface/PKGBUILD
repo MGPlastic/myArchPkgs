@@ -10,8 +10,8 @@ pkgdesc="TadasBaltrusaitis/OpenFace build from git"
 arch=(x86_64)
 license=(BSD)
 url="https://github.com/TadasBaltrusaitis/OpenFace"
-depends=(opencv-for-openface)
-makedepends=(cmake boost cblas dlib)
+depends=()
+makedepends=(cmake boost cblas dlib opencv-for-openface)
 source=($_pkgname::'git+https://github.com/TadasBaltrusaitis/OpenFace')
 sha256sums=('SKIP')
 
